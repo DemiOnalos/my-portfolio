@@ -1,0 +1,88 @@
+// Minimal JS to populate projects and wire simple interactions.
+// Replace the placeholder data in projects.json with your projects.
+document.addEventListener('DOMContentLoaded', () => {
+  const yearEl = document.getElementById('year');
+  yearEl.textContent = new Date().getFullYear();
+
+  // nav toggle for small screens
+  const nav = document.getElementById('nav');
+  const navToggle = document.getElementById('navToggle');
+  navToggle.addEventListener('click', () => nav.classList.toggle('show'));
+
+  // Load projects.json and render cards
+  fetch('projects.json')
+    .then(res => res.json())
+    .then(data => renderProjects(data))
+    .catch(err => {
+      console.warn('Could not load projects.json, using sample data', err);
+      renderProjects([]);
+    });
+
+  // Render social links if provided in site config (project file could be extended)
+  const socialLinksContainer = document.getElementById('social-links');
+  const contactEmail = document.getElementById('contact-email');
+  // Replace these placeholders with your own
+  const socials = [
+    {name:'GitHub', url:'https://github.com/yourusername'},
+    {name:'LinkedIn', url:'https://www.linkedin.com/in/yourusername'},
+  ];
+  socials.forEach(s => {
+    const a = document.createElement('a');
+    a.href = s.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.className = 'social-link';
+    a.textContent = s.name;
+    a.style.marginRight = '1rem';
+    socialLinksContainer.appendChild(a);
+  });
+
+  function renderProjects(projects){
+    const grid = document.getElementById('projects-grid');
+    if(!projects || projects.length === 0){
+      grid.innerHTML = '<p style="color:var(--muted)">No projects yet — add entries to projects.json.</p>';
+      return;
+    }
+    grid.innerHTML = '';
+    projects.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      if(p.image){
+        const img = document.createElement('img');
+        img.src = p.image;
+        img.alt = p.title;
+        card.appendChild(img);
+      }
+      const h3 = document.createElement('h3');
+      h3.textContent = p.title;
+      card.appendChild(h3);
+
+      const desc = document.createElement('p');
+      desc.textContent = p.description;
+      card.appendChild(desc);
+
+      const links = document.createElement('div');
+      links.className = 'links';
+      if(p.live){
+        const a = document.createElement('a');
+        a.href = p.live;
+        a.target='_blank';
+        a.rel='noopener';
+        a.textContent = 'Live';
+        a.className = 'btn';
+        links.appendChild(a);
+      }
+      if(p.repo){
+        const r = document.createElement('a');
+        r.href = p.repo;
+        r.target='_blank';
+        r.rel='noopener';
+        r.textContent = 'Code';
+        r.style.marginLeft = '0.5rem';
+        links.appendChild(r);
+      }
+      card.appendChild(links);
+      grid.appendChild(card);
+    });
+  }
+});
